@@ -1,4 +1,4 @@
-name: CMake Build, Test, Package, Docs and Lint
+name: CMake Build, Test, Package, Docs, Lint and Coverage
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y doxygen clang-format cppcheck
+        sudo apt-get install -y doxygen clang-format cppcheck lcov
 
     - name: Lint Code with Clang-Format
       run: clang-format --dry-run --Werror include/*.hpp sources/*.cpp examples/*.cpp tests/*.cpp
@@ -27,13 +27,19 @@ jobs:
       run: cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedFunction include/ sources/
 
     - name: Configure CMake
-      run: cmake -B build -S . -DBUILD_TESTS=ON
+      run: cmake -B build -S . -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON
 
     - name: Build project
       run: cmake --build build
 
     - name: Run Tests
       run: cd build && ctest --output-on-failure
+
+    - name: Generate Coverage Report
+      run: |
+        lcov --directory . --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*third-party*' '*tests*' --output-file filtered_coverage.info
+        genhtml filtered_coverage.info --output-directory coverage_report
 
     - name: Create Packages via CPack
       run: cd build && cpack
@@ -44,8 +50,9 @@ jobs:
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: project-artifacts
+        name: project-artifacts-and-coverage
         path: |
           build/*.tar.gz
           build/*.deb
           docs/html/
+          coverage_report/

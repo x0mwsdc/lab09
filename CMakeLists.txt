@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_TESTS "Build tests" OFF)
+option(ENABLE_COVERAGE "Enable code coverage metrics" OFF)
+
+if(ENABLE_COVERAGE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -O0 -g")
+endif()
 
 include_directories(include)
 
@@ -40,7 +45,6 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "x0mwsdc")
 set(CPACK_GENERATOR "TGZ;DEB")
 include(CPack)
 
-# Секция Doxygen для lab07
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   add_custom_target(docs
