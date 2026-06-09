@@ -37,8 +37,8 @@ jobs:
 
     - name: Generate Coverage Report
       run: |
-        lcov --directory . --capture --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' '*third-party*' '*tests*' --output-file filtered_coverage.info
+        lcov --directory . --capture --output-file coverage.info --ignore-errors mismatch,inconsistent
+        lcov --remove coverage.info '/usr/*' '*third-party*' '*tests*' --output-file filtered_coverage.info --ignore-errors unused,mismatch
         genhtml filtered_coverage.info --output-directory coverage_report
 
     - name: Create Packages via CPack
